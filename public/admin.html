@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>BCI Email Service - Admin Panel</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .nav-tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        .nav-tab {
+            flex: 1;
+            padding: 15px 20px;
+            background: #f8f9fa;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        .nav-tab.active {
+            background: #667eea;
+            color: white;
+        }
+        .tab-content {
+            display: none;
+            padding: 30px;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .form-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #495057;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        .btn {
+            background: #667eea;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            margin-right: 10px;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #e9ecef;
+        }
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #495057;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧠 BCI Email Service - Admin Panel</h1>
+        
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="showTab('send-email')">Send Email</button>
+            <button class="nav-tab" onclick="showTab('customers')">Customers</button>
+            <button class="nav-tab" onclick="showTab('email-logs')">Email Logs</button>
+            <button class="nav-tab" onclick="showTab('statistics')">Statistics</button>
+        </div>
+
+        <!-- Send Email Tab -->
+        <div id="send-email" class="tab-content active">
+            <div class="form-section">
+                <h3>📧 Send Manual Email</h3>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="displayName">Display Name:</label>
+                        <input type="text" id="displayName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="recipientEmail">Recipient Email:</label>
+                        <input type="email" id="recipientEmail" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="emailType">Email Type:</label>
+                    <select id="emailType" required onchange="loadEmailTemplate()">
+                        <option value="">-- Select Email Type --</option>
+                        <option value="registration">Registration Email</option>
+                        <option value="test-start">Test Start Email</option>
+                        <option value="test-completion">Test Completion Email</option>
+                        <option value="dmit-scans">DMIT Scans Email</option>
+                        <option value="counseling">Counseling Session Email</option>
+                        <option value="appointment">Appointment Booking</option>
+                    </select>
+                </div>
+
+                <div id="templateFields" style="display: none;"></div>
+
+                <button type="button" class="btn" onclick="sendEmail()">Send Email</button>
+                <button type="button" class="btn" onclick="clearForm()">Clear Form</button>
+            </div>
+            <div id="sendEmailResult"></div>
+        </div>
+
+        <!-- Customers Tab -->
+        <div id="customers" class="tab-content">
+            <div class="form-section">
+                <h3>👥 Add New Customer</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="newCustomerName">Display Name:</label>
+                        <input type="text" id="newCustomerName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="newCustomerEmail">Email:</label>
+                        <input type="email" id="newCustomerEmail" required>
+                    </div>
+                </div>
+                <button type="button" class="btn" onclick="addCustomer()">Add Customer</button>
+            </div>
+            <div id="addCustomerResult"></div>
+            
+            <div>
+                <h3>📋 Customer List</h3>
+                <table id="customersTable">
+                    <thead>
+                        <tr>
+                            <th>Customer ID</th>
+                            <th>Display Name</th>
+                            <th>Email</th>
+                            <th>Created</th>
+                        </tr>
+                    </thead>
+                    <tbody id="customersTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Email Logs Tab -->
+        <div id="email-logs" class="tab-content">
+            <div>
+                <h3>📊 Email Logs</h3>
+                <table id="emailLogsTable">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Customer ID</th>
+                            <th>Customer Name</th>
+                            <th>Email Type</th>
+                            <th>Recipient</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="emailLogsTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Statistics Tab -->
+        <div id="statistics" class="tab-content">
+            <div>
+                <h3>📈 Statistics</h3>
+                <div id="statsGrid"></div>
+                <table id="statsTable">
+                    <thead>
+                        <tr>
+                            <th>Email Type</th>
+                            <th>Total Sent</th>
+                            <th>Successful</th>
+                            <th>Failed</th>
+                            <th>Success Rate</th>
+                        </tr>
+                    </thead>
+                    <tbody id="statsTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showTab(tabName) {
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(content => content.classList.remove('active'));
+            
+            const tabs = document.querySelectorAll('.nav-tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+            
+            if (tabName === 'customers') {
+                loadCustomers();
+            } else if (tabName === 'email-logs') {
+                loadEmailLogs();
+            } else if (tabName === 'statistics') {
+                loadStatistics();
+            }
+        }
+
+        function showResult(elementId, message, isSuccess = true) {
+            document.getElementById(elementId).innerHTML = `<div class="result ${isSuccess ? 'success' : 'error'}">${message}</div>`;
+        }
+
+        const emailTemplates = {
+            'registration': [
+                { name: 'usercode', label: 'User Code', type: 'text', required: true },
+                { name: 'testType', label: 'Test Type', type: 'select', options: ['psychometric', 'aptitude', 'personality', 'cognitive'], required: true }
+            ],
+            'test-start': [
+                { name: 'startUrl', label: 'Start URL', type: 'url', required: true },
+                { name: 'resumeUrl', label: 'Resume URL', type: 'url', required: true },
+                { name: 'testType', label: 'Test Type', type: 'select', options: ['psychometric', 'aptitude', 'personality', 'cognitive'], required: true }
+            ],
+            'test-completion': [
+                { name: 'reportUrl', label: 'Report URL', type: 'url', required: true },
+                { name: 'testType', label: 'Test Type', type: 'select', options: ['psychometric', 'aptitude', 'personality', 'cognitive'], required: true }
+            ],
+            'counseling': [
+                { name: 'action', label: 'Action', type: 'select', options: ['schedule', 'reschedule', 'cancel'], required: true },
+                { name: 'sessionDate', label: 'Session Date', type: 'date', required: true },
+                { name: 'sessionTime', label: 'Session Time', type: 'time', required: true },
+                { name: 'counselor', label: 'Counselor', type: 'text', required: true },
+                { name: 'meetingLink', label: 'Meeting Link', type: 'url', required: true }
+            ],
+            'appointment': [],
+            'dmit-scans': []
+        };
+
+        function loadEmailTemplate() {
+            const emailType = document.getElementById('emailType').value;
+            const templateFields = document.getElementById('templateFields');
+            
+            if (!emailType) {
+                templateFields.style.display = 'none';
+                return;
+            }
+
+            const template = emailTemplates[emailType] || [];
+            let html = '';
+
+            template.forEach(field => {
+                html += '<div class="form-group">';
+                html += `<label for="${field.name}">${field.label}:</label>`;
+                
+                if (field.type === 'select') {
+                    html += `<select id="${field.name}" name="${field.name}" ${field.required ? 'required' : ''}>`;
+                    html += '<option value="">-- Select --</option>';
+                    field.options.forEach(option => {
+                        html += `<option value="${option}">${option.charAt(0).toUpperCase() + option.slice(1)}</option>`;
+                    });
+                    html += '</select>';
+                } else {
+                    html += `<input type="${field.type}" id="${field.name}" name="${field.name}" ${field.required ? 'required' : ''}>`;
+                }
+                
+                html += '</div>';
+            });
+
+            templateFields.innerHTML = html;
+            templateFields.style.display = 'block';
+        }
+
+        function clearForm() {
+            document.getElementById('displayName').value = '';
+            document.getElementById('recipientEmail').value = '';
+            document.getElementById('emailType').value = '';
+            document.getElementById('templateFields').style.display = 'none';
+            document.getElementById('sendEmailResult').innerHTML = '';
+        }
+
+        async function sendEmail() {
+            const emailType = document.getElementById('emailType').value;
+            const displayName = document.getElementById('displayName').value;
+            const recipientEmail = document.getElementById('recipientEmail').value;
+            
+            if (!emailType || !displayName || !recipientEmail) {
+                showResult('sendEmailResult', 'Please fill in all required fields', false);
+                return;
+            }
+
+            const templateFields = {};
+            const template = emailTemplates[emailType] || [];
+            template.forEach(field => {
+                const value = document.getElementById(field.name).value;
+                if (field.required && !value) {
+                    throw new Error(`${field.label} is required`);
+                }
+                templateFields[field.name] = value;
+            });
+
+            const requestData = {
+                displayName,
+                recipientEmail,
+                emailType,
+                ...templateFields
+            };
+
+            try {
+                const response = await fetch('/api/admin/send-email', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(requestData)
+                });
+                
+                const result = await response.json();
+                showResult('sendEmailResult', JSON.stringify(result, null, 2), result.success);
+                
+                if (result.success) {
+                    clearForm();
+                }
+            } catch (error) {
+                showResult('sendEmailResult', 'Error: ' + error.message, false);
+            }
+        }
+
+        async function addCustomer() {
+            const name = document.getElementById('newCustomerName').value;
+            const email = document.getElementById('newCustomerEmail').value;
+            
+            if (!name || !email) {
+                showResult('addCustomerResult', 'Please fill in all fields', false);
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/admin/customers', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ displayName: name, email })
+                });
+                
+                const result = await response.json();
+                showResult('addCustomerResult', JSON.stringify(result, null, 2), result.success);
+                
+                if (result.success) {
+                    document.getElementById('newCustomerName').value = '';
+                    document.getElementById('newCustomerEmail').value = '';
+                    loadCustomers();
+                }
+            } catch (error) {
+                showResult('addCustomerResult', 'Error: ' + error.message, false);
+            }
+        }
+
+        async function loadCustomers() {
+            try {
+                const response = await fetch('/api/admin/customers');
+                const customers = await response.json();
+                
+                const tbody = document.getElementById('customersTableBody');
+                tbody.innerHTML = '';
+                
+                customers.forEach(customer => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${customer.customer_id}</td>
+                        <td>${customer.display_name}</td>
+                        <td>${customer.email}</td>
+                        <td>${new Date(customer.created_at).toLocaleDateString()}</td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Error loading customers:', error);
+            }
+        }
+
+        async function loadEmailLogs() {
+            try {
+                const response = await fetch('/api/admin/email-logs');
+                const logs = await response.json();
+                
+                const tbody = document.getElementById('emailLogsTableBody');
+                tbody.innerHTML = '';
+                
+                logs.forEach(log => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${new Date(log.sent_at).toLocaleString()}</td>
+                        <td>${log.customer_number || 'N/A'}</td>
+                        <td>${log.customer_display_name || 'N/A'}</td>
+                        <td>${log.email_type}</td>
+                        <td>${log.recipient_email}</td>
+                        <td>${log.status}</td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Error loading email logs:', error);
+            }
+        }
+
+        async function loadStatistics() {
+            try {
+                const response = await fetch('/api/admin/statistics');
+                const stats = await response.json();
+                
+                const statsGrid = document.getElementById('statsGrid');
+                statsGrid.innerHTML = `
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px;">
+                        <div style="background: white; padding: 20px; border-radius: 8px; text-align: center;">
+                            <div style="font-size: 2em; font-weight: bold; color: #667eea;">${stats.totalCustomers}</div>
+                            <div>Total Customers</div>
+                        </div>
+                        <div style="background: white; padding: 20px; border-radius: 8px; text-align: center;">
+                            <div style="font-size: 2em; font-weight: bold; color: #667eea;">${stats.totalEmails}</div>
+                            <div>Total Emails</div>
+                        </div>
+                        <div style="background: white; padding: 20px; border-radius: 8px; text-align: center;">
+                            <div style="font-size: 2em; font-weight: bold; color: #28a745;">${stats.successfulEmails}</div>
+                            <div>Successful</div>
+                        </div>
+                        <div style="background: white; padding: 20px; border-radius: 8px; text-align: center;">
+                            <div style="font-size: 2em; font-weight: bold; color: #dc3545;">${stats.failedEmails}</div>
+                            <div>Failed</div>
+                        </div>
+                    </div>
+                `;
+                
+                const tbody = document.getElementById('statsTableBody');
+                tbody.innerHTML = '';
+                
+                stats.emailTypeStats.forEach(stat => {
+                    const successRate = stat.total_sent > 0 ? ((stat.successful / stat.total_sent) * 100).toFixed(1) : 0;
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${stat.email_type}</td>
+                        <td>${stat.total_sent}</td>
+                        <td>${stat.successful}</td>
+                        <td>${stat.failed}</td>
+                        <td>${successRate}%</td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Error loading statistics:', error);
+            }
+        }
+
+        window.addEventListener('load', () => {
+            loadCustomers();
+            loadEmailLogs();
+            loadStatistics();
+        });
+    </script>
+</body>
+</html>
