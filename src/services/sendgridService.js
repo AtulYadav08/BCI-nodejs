@@ -8,7 +8,7 @@ class SendGridService {
     async sendRegistrationEmail(userData, testType) {
         const msg = {
             to: userData.emailid,
-            from: process.env.FROM_EMAIL,
+            from: {email: process.env.FROM_EMAIL, name: process.env.FROM_NAME},
             subject: `Welcome to ${testType} Test - Registration Confirmed`,
             text: `Hello ${userData.username},\n\nWelcome to the ${testType} test! Your registration has been confirmed.\n\nYour user code: ${userData.usercode}\n\nBest regards,\nBCI Team`,
             html: `
@@ -20,7 +20,7 @@ class SendGridService {
                         <p><strong>Your User Code:</strong> ${userData.usercode}</p>
                     </div>
                     <p>We'll be in touch soon with further instructions.</p>
-                    <p>Best regards,<br>BCI Team</p>
+                    <p>Best regards,<br>Brainwonders Team</p>
                 </div>
             `
         };
@@ -37,7 +37,7 @@ class SendGridService {
     async sendTestStartEmail(userData, startUrl, resumeUrl, testType) {
         const msg = {
             to: userData.emailid,
-            from: process.env.FROM_EMAIL,
+            from: {email: process.env.FROM_EMAIL, name: process.env.FROM_NAME},
             subject: `Your ${testType} Test is Ready to Begin`,
             text: `Hello ${userData.username},\n\nYour ${testType} test is ready to begin!\n\nStart Test: ${startUrl}\nResume Test: ${resumeUrl}\n\nGood luck!\nBCI Team`,
             html: `
@@ -50,7 +50,7 @@ class SendGridService {
                     </div>
                     <p>If you need to resume a previous session, use this link: <a href="${resumeUrl}">Resume Test</a></p>
                     <p>Good luck!</p>
-                    <p>Best regards,<br>BCI Team</p>
+                    <p>Best regards,<br>Brainwonders Team</p>
                 </div>
             `
         };
@@ -67,7 +67,7 @@ class SendGridService {
     async sendTestCompletionEmail(userData, reportUrl, testType) {
         const msg = {
             to: userData.emailid,
-            from: process.env.FROM_EMAIL,
+            from: {email: process.env.FROM_EMAIL, name: process.env.FROM_NAME},
             subject: `Your ${testType} Test Results are Ready`,
             text: `Hello ${userData.username},\n\nCongratulations! You have completed your ${testType} test.\n\nView your results: ${reportUrl}\n\nThank you for participating!\nBCI Team`,
             html: `
@@ -80,7 +80,7 @@ class SendGridService {
                         <a href="${reportUrl}" style="background-color: #28a745; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block;">View Results</a>
                     </div>
                     <p>Thank you for participating in our assessment!</p>
-                    <p>Best regards,<br>BCI Team</p>
+                    <p>Best regards,<br>Brainwonders Team</p>
                 </div>
             `
         };
@@ -97,7 +97,7 @@ class SendGridService {
     async sendDMITScansCollectedEmail(userData) {
         const msg = {
             to: userData.emailid,
-            from: process.env.FROM_EMAIL,
+            from: {email: process.env.FROM_EMAIL, name: process.env.FROM_NAME},
             subject: 'DMIT Scans Successfully Collected',
             text: `Hello ${userData.username},\n\nGreat news! Your DMIT scans have been successfully collected and processed.\n\nWe will analyze the data and provide you with comprehensive insights soon.\n\nThank you for your patience!\nBCI Team`,
             html: `
@@ -112,7 +112,7 @@ class SendGridService {
                     <p>Our team will analyze the data and provide you with comprehensive insights about your multiple intelligences profile.</p>
                     <p>We'll notify you as soon as your detailed report is ready!</p>
                     <p>Thank you for your patience.</p>
-                    <p>Best regards,<br>BCI Team</p>
+                    <p>Best regards,<br>Brainwonders Team</p>
                 </div>
             `
         };
@@ -174,13 +174,13 @@ class SendGridService {
 
         const msg = {
             to: userData.emailid,
-            from: process.env.FROM_EMAIL,
+            from: {email: process.env.FROM_EMAIL, name: process.env.FROM_NAME},
             subject: subject,
             text: `Hello ${userData.username},\n\n${subject}\n\nDate: ${sessionDetails.date}\nTime: ${sessionDetails.time}\nCounselor: ${sessionDetails.counselor}\n\nBest regards,\nBCI Team`,
             html: `
                 <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
                     ${content}
-                    <p>Best regards,<br>BCI Team</p>
+                    <p>Best regards,<br>Brainwonders Team</p>
                 </div>
             `
         };
